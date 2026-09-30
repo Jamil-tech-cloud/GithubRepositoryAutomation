@@ -1,5 +1,7 @@
 name: Debug - Token Scopes (temporary)
-on: workflow_dispatch
+on:
+  pull_request:
+    branches: [dev]
 permissions:
   contents: read
 jobs:

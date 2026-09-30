@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Claude - implement issue and open PR
-        uses: anthropics/claude-code-action@v1.0.237
+        uses: anthropics/claude-code-action@fd1c128679612beff4ca259c78021c506e8aa7a7 # v1.0.237
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.PROJECT_TOKEN }}
@@ -47,6 +47,16 @@ jobs:
           # straight to dev/qa/main is additionally rejected server-side by branch
           # protection (enforce_admins: true, verified in Phase 1) regardless of this
           # allowlist — that's the authoritative guardrail for those three branches.
+          #
+          # Be honest about what this allowlist can and can't enforce: `Bash(dotnet *)`
+          # necessarily permits running arbitrary code in the repo (that's the point —
+          # it needs to run the test suite), and `Bash(find *)` permits `find -exec`,
+          # both of which can route around the `deny` entries below. The `deny` list is
+          # defense-in-depth against the *obvious* misuse paths (raw API calls, secret
+          # access, closing/merging), not an airtight sandbox. The real security
+          # boundary is: PROJECT_TOKEN's scope (this repo only), branch protection on
+          # dev/qa/main, and the fact that no workflow ever gives Claude merge/approve/
+          # deploy credentials in the first place.
           settings: |
             {
               "permissions": {

@@ -85,6 +85,10 @@ jobs:
                 "deny": [
                   "Bash(git config *)",
                   "Bash(git remote *)",
+                  "Bash(cat .git/config)",
+                  "Bash(cat ./.git/config)",
+                  "Bash(grep * .git/config*)",
+                  "Read(**/.git/config)",
                   "Bash(gh pr merge *)",
                   "Bash(gh pr review *)",
                   "Bash(gh pr close *)",

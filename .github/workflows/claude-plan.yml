@@ -42,7 +42,6 @@ jobs:
                   "Bash(git log *)",
                   "Bash(cat *)",
                   "Bash(ls *)",
-                  "Bash(find *)",
                   "Bash(grep *)",
                   "Bash(gh issue view *)"
                 ],

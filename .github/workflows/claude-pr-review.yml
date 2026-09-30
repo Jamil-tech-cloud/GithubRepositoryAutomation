@@ -11,7 +11,7 @@ name: Claude - PR Review
 
 on:
   pull_request:
-    types: [opened, ready_for_review, synchronize]
+    types: [opened, ready_for_review, synchronize, reopened]
     branches: [dev]
 
 permissions:
@@ -46,7 +46,6 @@ jobs:
                   "Bash(git show *)",
                   "Bash(cat *)",
                   "Bash(ls *)",
-                  "Bash(find *)",
                   "Bash(grep *)",
                   "Bash(gh pr view *)",
                   "Bash(gh pr diff *)",

@@ -1,0 +1,29 @@
+name: Board - New Issue
+
+# New issue -> Backlog. Implemented as our own workflow rather than relying on the
+# Project's built-in "item added" workflow, because that built-in workflow has no
+# configuration API (GraphQL only exposes an enable/disable toggle) — doing it here
+# keeps the whole board fully defined in code.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  move-to-backlog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/set-issue-status
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          target-status: Backlog
+          project-owner: ${{ vars.PROJECT_OWNER }}
+          project-number: ${{ vars.PROJECT_NUMBER }}
+          project-token: ${{ secrets.PROJECT_TOKEN }}
+          repo: ${{ github.repository }}

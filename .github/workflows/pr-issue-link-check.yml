@@ -34,7 +34,7 @@ jobs:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
-          if issue_number=$(scripts/parse-linked-issue.sh); then
+          if issue_number=$(bash scripts/parse-linked-issue.sh); then
             echo "Linked issue: #$issue_number"
             echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
           else

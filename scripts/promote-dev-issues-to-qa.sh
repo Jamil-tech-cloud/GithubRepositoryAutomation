@@ -17,7 +17,7 @@ mapfile -t issue_numbers < <(
   gh pr list --repo "$REPO" --base dev --state merged --limit 200 \
     --json body,headRefName --jq '.[] | [.body, .headRefName] | @tsv' |
   while IFS=$'\t' read -r body head_ref; do
-    PR_BODY="$body" HEAD_REF="$head_ref" "$script_dir/parse-linked-issue.sh" || true
+    PR_BODY="$body" HEAD_REF="$head_ref" bash "$script_dir/parse-linked-issue.sh" || true
   done | sort -un
 )
 
@@ -29,5 +29,5 @@ fi
 for issue_number in "${issue_numbers[@]}"; do
   PROJECT_OWNER="$PROJECT_OWNER" PROJECT_NUMBER="$PROJECT_NUMBER" REPO="$REPO" \
     ISSUE_NUMBER="$issue_number" TARGET_STATUS="QA" FROM_STATUSES="Development Done" \
-    "$script_dir/set-issue-status.sh"
+    bash "$script_dir/set-issue-status.sh"
 done

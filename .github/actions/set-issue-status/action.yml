@@ -40,4 +40,4 @@ runs:
         ISSUE_NUMBER: ${{ inputs.issue-number }}
         TARGET_STATUS: ${{ inputs.target-status }}
         FROM_STATUSES: ${{ inputs.from-statuses }}
-      run: "${{ github.action_path }}/../../../scripts/set-issue-status.sh"
+      run: bash "${{ github.action_path }}/../../../scripts/set-issue-status.sh"

@@ -19,7 +19,7 @@ for pr_number in $PR_NUMBERS; do
   body=$(jq -r '.body' <<<"$pr_json")
   head_ref=$(jq -r '.headRefName' <<<"$pr_json")
 
-  if issue_number=$(PR_BODY="$body" HEAD_REF="$head_ref" "$script_dir/parse-linked-issue.sh"); then
+  if issue_number=$(PR_BODY="$body" HEAD_REF="$head_ref" bash "$script_dir/parse-linked-issue.sh"); then
     seen_issues["$issue_number"]=1
   else
     echo "[complete-released-issues] PR #$pr_number has no linked issue; skipping."
@@ -34,7 +34,7 @@ fi
 for issue_number in "${!seen_issues[@]}"; do
   PROJECT_OWNER="$PROJECT_OWNER" PROJECT_NUMBER="$PROJECT_NUMBER" REPO="$REPO" \
     ISSUE_NUMBER="$issue_number" TARGET_STATUS="Completed" FROM_STATUSES="QA" \
-    "$script_dir/set-issue-status.sh"
+    bash "$script_dir/set-issue-status.sh"
 
   current_state=$(gh issue view "$issue_number" --repo "$REPO" --json state --jq '.state')
   if [[ "$current_state" == "CLOSED" ]]; then

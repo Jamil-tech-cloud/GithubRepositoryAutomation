@@ -24,7 +24,13 @@ permissions:
 
 jobs:
   implement:
-    if: github.event.issue.pull_request == null
+    # The `!contains(..., '[View job](')` guard is critical: claude-code-action posts
+    # its own tracking/completion comments under the triggering user's identity (not a
+    # bot account), so without this, a comment that happens to mention the trigger
+    # phrase would re-trigger this workflow on its own output — confirmed as a real
+    # infinite loop in testing (see docs/POC.md incident notes). All action-generated
+    # comments carry this exact footer regardless of track_progress.
+    if: github.event.issue.pull_request == null && !contains(github.event.comment.body, '[View job](')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,7 +44,6 @@ jobs:
           trigger_phrase: "@claude implement"
           base_branch: dev
           branch_prefix: "feature/"
-          track_progress: "true"
           claude_args: "--max-turns 40"
           # Scoped to the specific git subcommands implementation actually needs, rather
           # than a Bash(git *) wildcard: PROJECT_TOKEN is a real user PAT, and `git
@@ -123,3 +128,9 @@ jobs:
             Never approve, merge, or close the PR yourself. Never push directly to
             `dev`, `qa`, or `main`. Never modify branch protection, environments, or
             repository secrets.
+
+            IMPORTANT: never write the literal strings `@claude plan` or
+            `@claude implement` anywhere in a comment you post, not even as a
+            suggestion to the reader — these are automation trigger phrases, and
+            writing them out would re-trigger this automation on your own comment.
+            Describe next steps in plain language instead.

@@ -6,3 +6,4 @@ Full documentation lands in `docs/POC.md` (architecture, setup, security) and `d
 (10-minute demo script) once the repository scaffolding is complete.
 
 **Status:** bootstrapping — see the repository's Project board for progress.
+test2

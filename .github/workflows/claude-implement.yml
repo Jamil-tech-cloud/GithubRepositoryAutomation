@@ -40,6 +40,10 @@ jobs:
           branch_prefix: "feature/"
           track_progress: "true"
           claude_args: "--max-turns 40"
+          # `Bash(git *)` is broad, but a push straight to dev/qa/main is still rejected
+          # server-side by branch protection (enforce_admins: true, verified in Phase 1
+          # testing) regardless of what Bash allows locally — that's the authoritative
+          # guardrail here, not the allowlist.
           settings: |
             {
               "permissions": {

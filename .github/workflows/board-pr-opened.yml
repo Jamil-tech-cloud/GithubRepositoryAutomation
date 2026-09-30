@@ -1,0 +1,56 @@
+name: Board - PR Opened
+
+# PR into dev opened or marked ready for review, referencing an issue -> Development Done.
+# Draft PRs keep the issue at In Progress (also handles a ready PR being converted back
+# to draft).
+#
+# SECURITY: PR body/branch name are untrusted input — read only via env vars, matched
+# with a fixed regex, never shell-interpolated. See scripts/parse-linked-issue.sh.
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened, converted_to_draft]
+    branches: [dev]
+
+permissions:
+  contents: read
+
+jobs:
+  move-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse linked issue
+        id: parse
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          if issue_number=$(scripts/parse-linked-issue.sh); then
+            echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
+          else
+            echo "No linked issue found on this PR; the issue-link check will fail it separately. Skipping board move."
+            echo "issue_number=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine target status
+        id: target
+        run: |
+          if [[ "${{ github.event.pull_request.draft }}" == "true" ]]; then
+            echo "status=In Progress" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=Development Done" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: ./.github/actions/set-issue-status
+        if: steps.parse.outputs.issue_number != ''
+        with:
+          issue-number: ${{ steps.parse.outputs.issue_number }}
+          target-status: ${{ steps.target.outputs.status }}
+          project-owner: ${{ vars.PROJECT_OWNER }}
+          project-number: ${{ vars.PROJECT_NUMBER }}
+          project-token: ${{ secrets.PROJECT_TOKEN }}
+          repo: ${{ github.repository }}

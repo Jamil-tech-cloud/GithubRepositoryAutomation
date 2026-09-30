@@ -1,0 +1,43 @@
+name: Set issue status
+description: >
+  Moves an issue to a target Status column on the Projects v2 board.
+  Idempotent — safe to call more than once for the same issue/status.
+
+inputs:
+  issue-number:
+    description: Issue number to move
+    required: true
+  target-status:
+    description: "One of: Backlog, In Progress, Development Done, QA, Completed"
+    required: true
+  from-statuses:
+    description: Optional comma-separated list of statuses this move is allowed from
+    required: false
+    default: ""
+  project-owner:
+    description: Login of the project's owner
+    required: true
+  project-number:
+    description: Project number
+    required: true
+  project-token:
+    description: Token with repo+project scope (the PROJECT_TOKEN secret)
+    required: true
+  repo:
+    description: "owner/name of the repository the issue lives in"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Move issue status
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.project-token }}
+        PROJECT_OWNER: ${{ inputs.project-owner }}
+        PROJECT_NUMBER: ${{ inputs.project-number }}
+        REPO: ${{ inputs.repo }}
+        ISSUE_NUMBER: ${{ inputs.issue-number }}
+        TARGET_STATUS: ${{ inputs.target-status }}
+        FROM_STATUSES: ${{ inputs.from-statuses }}
+      run: "${{ github.action_path }}/../../../scripts/set-issue-status.sh"

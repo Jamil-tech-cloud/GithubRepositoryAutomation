@@ -43,6 +43,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           label_trigger: "claude-plan"
           trigger_phrase: "@claude plan"
+          show_full_output: "true"
           claude_args: "--max-turns 15"
           settings: |
             {

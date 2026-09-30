@@ -1,0 +1,59 @@
+name: PR Issue Link Check
+
+# Required status check: every PR into dev must reference the issue it resolves,
+# either via a `Closes #N` / `Fixes #N` / `Resolves #N` line in the PR body, or via a
+# `feature/N-...` branch name. This is enforced here (not just left to GitHub's native
+# keyword auto-close) because auto-close-on-merge only applies when a PR targets the
+# repo's default branch, and our PRs target `dev`, not the default branch (`main`).
+#
+# SECURITY: the PR body/branch name are untrusted, attacker-controlled text. They are only
+# ever read via env vars and matched with a fixed regex — never interpolated into a shell
+# command or `run:` template string.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+    branches: [dev]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  check-issue-link:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse PR body and branch name for a linked issue
+        id: parse
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+
+          issue_number=""
+
+          # Closes/Fixes/Resolves #N (case-insensitive), optionally "closes: #N"
+          if [[ -n "${PR_BODY:-}" ]]; then
+            match=$(printf '%s' "$PR_BODY" | grep -iPo '(close[sd]?|fix(e[sd])?|resolve[sd]?)\s*:?\s*#\K[0-9]+' | head -n1 || true)
+            if [[ -n "$match" ]]; then
+              issue_number="$match"
+            fi
+          fi
+
+          # Fallback: feature/N-... branch name
+          if [[ -z "$issue_number" && -n "${HEAD_REF:-}" ]]; then
+            match=$(printf '%s' "$HEAD_REF" | grep -Po '^feature/\K[0-9]+' || true)
+            if [[ -n "$match" ]]; then
+              issue_number="$match"
+            fi
+          fi
+
+          if [[ -z "$issue_number" ]]; then
+            echo "::error::No linked issue found. Add 'Closes #N' to the PR description or name the branch 'feature/N-<slug>'."
+            exit 1
+          fi
+
+          echo "Linked issue: #$issue_number"
+          echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"

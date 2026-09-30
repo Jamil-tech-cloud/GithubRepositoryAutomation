@@ -1,0 +1,30 @@
+name: Feature request
+description: Propose a new feature or change
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Be specific enough that "@claude plan" or "@claude implement" can act on it.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: checkboxes
+    id: claude
+    attributes:
+      label: AI assistance
+      options:
+        - label: Add the `claude-plan` label or comment `@claude plan` to get an implementation plan first.
+          required: false

@@ -32,7 +32,6 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           use_sticky_comment: "true"
-          show_full_output: "true"
           claude_args: "--max-turns 20"
           settings: |
             {
@@ -48,9 +47,7 @@ jobs:
                   "Bash(gh pr view *)",
                   "Bash(gh pr diff *)",
                   "Bash(gh pr list *)",
-                  "Bash(gh pr comment *)",
-                  "Bash(env *)",
-                  "Bash(printenv *)"
+                  "Bash(gh pr comment *)"
                 ],
                 "deny": [
                   "Bash(gh pr merge *)",

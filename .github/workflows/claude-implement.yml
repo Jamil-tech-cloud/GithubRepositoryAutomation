@@ -40,15 +40,27 @@ jobs:
           branch_prefix: "feature/"
           track_progress: "true"
           claude_args: "--max-turns 40"
-          # `Bash(git *)` is broad, but a push straight to dev/qa/main is still rejected
-          # server-side by branch protection (enforce_admins: true, verified in Phase 1
-          # testing) regardless of what Bash allows locally — that's the authoritative
-          # guardrail here, not the allowlist.
+          # Scoped to the specific git subcommands implementation actually needs, rather
+          # than a Bash(git *) wildcard: PROJECT_TOKEN is a real user PAT, and `git
+          # config`/`git remote -v` can expose the PAT-bearing remote URL, while a bare
+          # wildcard would also allow pushes to arbitrary non-protected branches. Pushing
+          # straight to dev/qa/main is additionally rejected server-side by branch
+          # protection (enforce_admins: true, verified in Phase 1) regardless of this
+          # allowlist — that's the authoritative guardrail for those three branches.
           settings: |
             {
               "permissions": {
                 "allow": [
-                  "Bash(git *)",
+                  "Bash(git checkout *)",
+                  "Bash(git switch *)",
+                  "Bash(git add *)",
+                  "Bash(git commit *)",
+                  "Bash(git push *)",
+                  "Bash(git status *)",
+                  "Bash(git diff *)",
+                  "Bash(git log *)",
+                  "Bash(git branch *)",
+                  "Bash(git rev-parse *)",
                   "Bash(dotnet *)",
                   "Bash(cat *)",
                   "Bash(ls *)",
@@ -61,6 +73,8 @@ jobs:
                   "Bash(gh issue comment *)"
                 ],
                 "deny": [
+                  "Bash(git config *)",
+                  "Bash(git remote *)",
                   "Bash(gh pr merge *)",
                   "Bash(gh pr review *)",
                   "Bash(gh pr close *)",

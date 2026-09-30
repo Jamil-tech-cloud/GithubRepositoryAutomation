@@ -54,6 +54,7 @@ jobs:
                   "Bash(ls *)",
                   "Bash(grep *)",
                   "Bash(gh issue view *)",
+                  "Bash(gh issue list *)",
                   "Bash(gh issue comment *)"
                 ],
                 "deny": [

@@ -1,0 +1,38 @@
+name: Board - QA Failed
+
+# Label `qa-failed` on an issue currently in QA -> back to In Progress, with an
+# explanatory comment. Only acts if the issue is currently in QA, so the label
+# can't be used to yank an unrelated issue backwards by accident.
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  qa-failed:
+    if: github.event.label.name == 'qa-failed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Comment explaining the move
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body \
+            "QA marked this as failed (\`qa-failed\` label). Moving back to **In Progress**. Please address the reported failure, push a fix, and open a new PR into \`dev\` referencing this issue."
+
+      - uses: ./.github/actions/set-issue-status
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          target-status: In Progress
+          from-statuses: QA
+          project-owner: ${{ vars.PROJECT_OWNER }}
+          project-number: ${{ vars.PROJECT_NUMBER }}
+          project-token: ${{ secrets.PROJECT_TOKEN }}
+          repo: ${{ github.repository }}

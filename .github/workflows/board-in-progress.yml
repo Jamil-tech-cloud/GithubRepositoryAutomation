@@ -1,0 +1,66 @@
+name: Board - In Progress
+
+# Issue assigned, or a feature/N-... branch is created for it -> In Progress.
+# When Claude's "@claude implement" automation (Phase 3) creates a branch, it lands
+# here for free via the branch-created trigger.
+#
+# Only moves issues currently in Backlog, so re-assigning or re-pushing an issue
+# that has already progressed further doesn't drag it backwards.
+
+on:
+  issues:
+    types: [assigned]
+  create:
+
+permissions:
+  contents: read
+
+jobs:
+  issue-assigned:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/set-issue-status
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          target-status: In Progress
+          from-statuses: Backlog
+          project-owner: ${{ vars.PROJECT_OWNER }}
+          project-number: ${{ vars.PROJECT_NUMBER }}
+          project-token: ${{ secrets.PROJECT_TOKEN }}
+          repo: ${{ github.repository }}
+
+  feature-branch-created:
+    if: github.event_name == 'create' && github.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse issue number from branch name
+        id: parse
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          match=$(printf '%s' "$REF_NAME" | grep -Po '^feature/\K[0-9]+' || true)
+          if [[ -z "$match" ]]; then
+            echo "Branch '$REF_NAME' is not a feature/N-... branch; nothing to do."
+            echo "issue_number=" >> "$GITHUB_OUTPUT"
+          else
+            echo "issue_number=$match" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: ./.github/actions/set-issue-status
+        if: steps.parse.outputs.issue_number != ''
+        with:
+          issue-number: ${{ steps.parse.outputs.issue_number }}
+          target-status: In Progress
+          from-statuses: Backlog
+          project-owner: ${{ vars.PROJECT_OWNER }}
+          project-number: ${{ vars.PROJECT_NUMBER }}
+          project-token: ${{ secrets.PROJECT_TOKEN }}
+          repo: ${{ github.repository }}

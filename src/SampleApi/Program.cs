@@ -28,6 +28,10 @@ app.MapGet("/api/items/{id:int}", (int id, ItemService items) =>
     })
     .WithName("GetItemById");
 
+app.MapGet("/api/items/{id:int}/exists", (int id, ItemService items) =>
+        items.GetById(id) is null ? Results.NotFound() : Results.Ok())
+    .WithName("ItemExists");
+
 app.MapPost("/api/items", (CreateItemRequest request, ItemService items) =>
     {
         if (string.IsNullOrWhiteSpace(request.Name))

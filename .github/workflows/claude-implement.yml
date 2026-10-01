@@ -79,6 +79,8 @@ jobs:
             {
               "permissions": {
                 "allow": [
+                  "Edit",
+                  "Write",
                   "Bash(git checkout *)",
                   "Bash(git switch *)",
                   "Bash(git add *)",

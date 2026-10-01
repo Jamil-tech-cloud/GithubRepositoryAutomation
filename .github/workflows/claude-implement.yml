@@ -40,8 +40,14 @@ jobs:
       contains(github.event.comment.body, '@claude implement')
     runs-on: ubuntu-latest
     steps:
+      # ref: dev is required — issue_comment events have no natural ref, so without
+      # this, checkout defaults to the repo's default branch (main), and dev (what
+      # base_branch tells the action to branch from) is never fetched. Confirmed by
+      # testing: Claude correctly reported it couldn't fetch dev rather than guessing.
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: dev
 
       - name: Claude - implement issue and open PR
         uses: anthropics/claude-code-action@fd1c128679612beff4ca259c78021c506e8aa7a7 # v1.0.237

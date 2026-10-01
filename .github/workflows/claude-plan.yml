@@ -21,16 +21,20 @@ permissions:
 jobs:
   plan:
     # issue_comment fires for both issues and PR conversations; only act on real issues.
-    # The `!contains(..., '[View job](')` guard is critical: claude-code-action's own
-    # tracking comments are posted under the triggering user's identity (not a bot
-    # account), so without this, a comment that happens to mention the trigger phrase
-    # (e.g. suggesting "comment @claude implement next") would re-trigger the matching
-    # workflow — confirmed as a real infinite loop in testing, see incident notes in
-    # docs/POC.md.
+    # Two guards, both load-bearing:
+    # - `!contains(..., '[View job](')`: claude-code-action's own tracking comments
+    #   can be posted under the triggering user's identity (not reliably a bot
+    #   account), so without this, a comment that happens to mention a trigger phrase
+    #   would re-trigger a workflow on its own output — confirmed as a real infinite
+    #   loop in testing.
+    # - `contains(github.event.comment.body, '@claude plan')`: claude-code-action's
+    #   own trigger_phrase matching is not an exact-substring check — a comment
+    #   containing only "@claude implement" was observed triggering this workflow
+    #   too. This explicit check is what actually keeps plan/implement separate.
     if: >-
       !contains(github.event.comment.body, '[View job](') &&
       ((github.event_name == 'issues' && github.event.label.name == 'claude-plan') ||
-       (github.event_name == 'issue_comment' && github.event.issue.pull_request == null))
+       (github.event_name == 'issue_comment' && github.event.issue.pull_request == null && contains(github.event.comment.body, '@claude plan')))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

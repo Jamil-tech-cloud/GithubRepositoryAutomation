@@ -24,13 +24,20 @@ permissions:
 
 jobs:
   implement:
-    # The `!contains(..., '[View job](')` guard is critical: claude-code-action posts
-    # its own tracking/completion comments under the triggering user's identity (not a
-    # bot account), so without this, a comment that happens to mention the trigger
-    # phrase would re-trigger this workflow on its own output — confirmed as a real
-    # infinite loop in testing (see docs/POC.md incident notes). All action-generated
-    # comments carry this exact footer regardless of track_progress.
-    if: github.event.issue.pull_request == null && !contains(github.event.comment.body, '[View job](')
+    # Two guards, both load-bearing:
+    # - `!contains(..., '[View job](')`: claude-code-action posts its own
+    #   tracking/completion comments, sometimes under the triggering user's own
+    #   identity rather than a bot account, so without this, a comment that mentions a
+    #   trigger phrase would re-trigger a workflow on its own output — confirmed as a
+    #   real infinite loop in testing.
+    # - `contains(github.event.comment.body, '@claude implement')`: claude-code-action's
+    #   trigger_phrase matching is not an exact-substring check — a comment containing
+    #   only "@claude plan" was observed also triggering this workflow. This explicit
+    #   check is what actually keeps plan/implement separate.
+    if: >-
+      github.event.issue.pull_request == null &&
+      !contains(github.event.comment.body, '[View job](') &&
+      contains(github.event.comment.body, '@claude implement')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -85,6 +92,7 @@ jobs:
                   "Bash(gh pr view *)",
                   "Bash(gh pr comment *)",
                   "Bash(gh issue view *)",
+                  "Bash(gh issue list *)",
                   "Bash(gh issue comment *)"
                 ],
                 "deny": [

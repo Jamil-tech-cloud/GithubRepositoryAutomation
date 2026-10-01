@@ -88,12 +88,8 @@ jobs:
                   "Bash(ls *)",
                   "Bash(find *)",
                   "Bash(grep *)",
-                  "Bash(gh pr create *)",
-                  "Bash(gh pr view *)",
-                  "Bash(gh pr comment *)",
-                  "Bash(gh issue view *)",
-                  "Bash(gh issue list *)",
-                  "Bash(gh issue comment *)"
+                  "Bash(gh pr *)",
+                  "Bash(gh issue *)"
                 ],
                 "deny": [
                   "Bash(git config *)",

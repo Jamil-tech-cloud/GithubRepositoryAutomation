@@ -47,6 +47,10 @@ app.MapPost("/api/items/{id:int}/complete", (int id, ItemService items) =>
     })
     .WithName("CompleteItem");
 
+app.MapDelete("/api/items/{id:int}", (int id, ItemService items) =>
+        items.Delete(id) ? Results.NoContent() : Results.NotFound())
+    .WithName("DeleteItem");
+
 app.Run();
 
 record CreateItemRequest(string Name);

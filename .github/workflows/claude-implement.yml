@@ -51,6 +51,7 @@ jobs:
           trigger_phrase: "@claude implement"
           base_branch: dev
           branch_prefix: "feature/"
+          show_full_output: "true"
           claude_args: "--max-turns 40"
           # Scoped to the specific git subcommands implementation actually needs, rather
           # than a Bash(git *) wildcard: PROJECT_TOKEN is a real user PAT, and `git

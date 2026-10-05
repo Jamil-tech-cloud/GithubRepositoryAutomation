@@ -33,7 +33,7 @@ fi
 
 for issue_number in "${!seen_issues[@]}"; do
   PROJECT_OWNER="$PROJECT_OWNER" PROJECT_NUMBER="$PROJECT_NUMBER" REPO="$REPO" \
-    ISSUE_NUMBER="$issue_number" TARGET_STATUS="Completed" FROM_STATUSES="QA" \
+    ISSUE_NUMBER="$issue_number" TARGET_STATUS="Completed" FROM_STATUSES="QA,Development Done" \
     bash "$script_dir/set-issue-status.sh"
 
   current_state=$(gh issue view "$issue_number" --repo "$REPO" --json state --jq '.state')

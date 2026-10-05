@@ -33,7 +33,12 @@ app.MapGet("/api/items", (ItemService items) => Results.Ok(items.GetAll()))
     .WithSummary("List all items")
     .WithDescription("Returns every item, ordered by id.");
 
-app.MapGet("/api/items/{id:int}", (int id, ItemService items) =>
+app.MapGet("/api/items/count", (ItemService items) => Results.Ok(new { count = items.GetAll().Count }))
+    .WithName("GetItemCount")
+    .WithSummary("Count items")
+    .WithDescription("Returns the total number of items as a JSON object with a single count property.");
+
+app.MapGet("/api/items/{id:int}",(int id, ItemService items) =>
     {
         var item = items.GetById(id);
         return item is null ? Results.NotFound() : Results.Ok(item);

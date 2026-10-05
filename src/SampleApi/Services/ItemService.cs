@@ -27,6 +27,8 @@ public class ItemService
         return item;
     }
 
+    public bool Delete(int id) => _items.TryRemove(id, out _);
+
     public Item? Complete(int id)
     {
         if (!_items.TryGetValue(id, out var existing))

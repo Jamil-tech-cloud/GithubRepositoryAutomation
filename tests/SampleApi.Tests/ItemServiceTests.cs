@@ -48,4 +48,22 @@ public class ItemServiceTests
 
         Assert.Null(result);
     }
+
+    [Fact]
+    public void Delete_ExistingItem_RemovesItAndReturnsTrue()
+    {
+        var service = new ItemService();
+        var created = service.Add("To delete");
+
+        Assert.True(service.Delete(created.Id));
+        Assert.Null(service.GetById(created.Id));
+    }
+
+    [Fact]
+    public void Delete_MissingItem_ReturnsFalse()
+    {
+        var service = new ItemService();
+
+        Assert.False(service.Delete(9999));
+    }
 }

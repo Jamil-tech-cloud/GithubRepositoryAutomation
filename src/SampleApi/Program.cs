@@ -71,6 +71,10 @@ app.MapPost("/api/items/{id:int}/complete", (int id, ItemService items) =>
     .WithSummary("Mark an item as done")
     .WithDescription("Sets done=true on the item with the given id, or returns 404 if it does not exist.");
 
+app.MapDelete("/api/items/{id:int}", (int id, ItemService items) =>
+        items.Delete(id) ? Results.NoContent() : Results.NotFound())
+    .WithName("DeleteItem");
+
 app.Run();
 
 record CreateItemRequest(string Name);

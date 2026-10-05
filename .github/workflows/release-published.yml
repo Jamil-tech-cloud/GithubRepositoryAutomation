@@ -1,0 +1,42 @@
+name: Release Published
+
+# When a human publishes a release, every issue whose pull request is part of that
+# release moves to Completed on the board and is closed. The production deploy itself
+# already ran when the release commit reached main and was approved (see cd-production.yml).
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  complete-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find the pull requests in this release
+        id: prs
+        env:
+          BODY: ${{ github.event.release.body }}
+        run: |
+          nums=$(printf '%s' "$BODY" | grep -oE '<!-- release-prs: [0-9 ]* -->' \
+            | grep -oE '[0-9]+' | tr '\n' ' ' || true)
+          echo "numbers=$nums" >> "$GITHUB_OUTPUT"
+          echo "Pull requests in this release: ${nums:-none}"
+
+      - name: Move issues to Completed and close them
+        if: steps.prs.outputs.numbers != ''
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          REPO: ${{ github.repository }}
+          PROJECT_OWNER: ${{ vars.PROJECT_OWNER }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          PR_NUMBERS: ${{ steps.prs.outputs.numbers }}
+        run: bash scripts/complete-released-issues.sh

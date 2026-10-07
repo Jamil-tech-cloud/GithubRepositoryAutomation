@@ -38,6 +38,11 @@ app.MapGet("/api/items/count", (ItemService items) => Results.Ok(new { count = i
     .WithSummary("Count items")
     .WithDescription("Returns the total number of items as a JSON object with a single count property.");
 
+app.MapGet("/api/items/done", (ItemService items) => Results.Ok(items.GetAll().Where(i => i.Done).ToList()))
+    .WithName("GetDoneItems")
+    .WithSummary("List done items")
+    .WithDescription("Returns only the items marked done, ordered by id. Returns an empty array if none are done.");
+
 app.MapGet("/api/items/{id:int}",(int id, ItemService items) =>
     {
         var item = items.GetById(id);
